@@ -1,8 +1,14 @@
 const path = require('path')
 const htmlPlugin = require('html-webpack-plugin')
+const webpack = require('webpack')
+
 
 module.exports = {
-    entry: path.join(__dirname, 'src', 'client', 'App.js'),
+    mode: process.env.NODE_ENV,
+    entry: [
+        'webpack-hot-middleware/client',
+        path.join(__dirname, 'src', 'client', 'App.js')
+    ],
     output: {
         path: path.join(__dirname, 'dist'),
         filename: 'build.js'
@@ -27,9 +33,14 @@ module.exports = {
             include: /src/
         }]
     },
-    plugins: [new htmlPlugin({
-        title: "Login / Sign up",
-        template: './src/client/index.ejs',
-        hash: true
-    })]
+    plugins: [
+        new htmlPlugin({
+            title: "Login / Sign up",
+            template: './src/client/index.ejs',
+            hash: true
+        }),
+        new webpack.optimize.OccurrenceOrderPlugin(),
+        new webpack.HotModuleReplacementPlugin(),
+        new webpack.NoEmitOnErrorsPlugin(),
+    ]
 }

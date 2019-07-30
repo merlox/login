@@ -4,8 +4,8 @@
     "description": "A minimalistic login / sign up system made with react and node",
     "main": "index.js",
     "scripts": {
-        "webpack": "webpack -wd",
-        "start": "nodemon src/server/server.js"
+        "dev": "NODE_ENV=development nodemon src/server/server.js",
+        "start": "NODE_ENV=production node src/server/server.js"
     },
     "repository": {
         "type": "git",
@@ -38,7 +38,9 @@
         "style-loader": "^0.21.0",
         "stylus": "^0.54.5",
         "stylus-loader": "^3.0.2",
-        "webpack": "^4.20.2",
-        "webpack-cli": "^3.3.6"
+        "webpack": "^4.38.0",
+        "webpack-cli": "^3.3.6",
+        "webpack-dev-middleware": "^3.7.0",
+        "webpack-hot-middleware": "^2.25.0"
     }
 }

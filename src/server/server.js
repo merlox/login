@@ -2,6 +2,19 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const path = require('path')
 const app = express()
+
+// Set the webpack hot reloading functionality with a custom server
+if(process.env.NODE_ENV != 'production') {
+	console.log('Serving server on dev mode with hot reloading')
+	const webpack = require('webpack')
+	const webpackConfig = require(__dirname + './../../webpack.config.js')
+	const compiler = webpack(webpackConfig)
+	app.use(require('webpack-dev-middleware')(compiler, {
+		noInfo: true,
+		publicPath: webpackConfig.output.publicPath,
+	}))
+}
+
 const port = 8000
 
 app.use(bodyParser.json())
