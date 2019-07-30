@@ -17,10 +17,20 @@ button
     &:active
         background-color: rgb(0, 98, 139)
 
-input, textarea
+input:not([type='submit']), textarea
     padding: 20px
     border-radius: 10px
+    font-size: 15pt
     border: 1px solid lightgrey
+    box-sizing: border-box
+
+input[type='submit']
+    padding: 20px
+    border: none
+    font-size: 16px
+
+.hidden
+    display: none
 
 .boxy-link
     color: white
@@ -43,7 +53,7 @@ input, textarea
     justify-items: center
     align-items: center
 
-.welcome-page
+.page
     max-width: 400px
     position: fixed
     box-shadow: 0 0 30px 0 lightgrey
@@ -57,11 +67,42 @@ input, textarea
     h1
         margin-top: 0
 
+.error-message
+    color: tomato
+    font-size: 14pt
+    text-align: center
+
+.welcome-page
     .link-container
         display: flex
         flex-direction: column
 
         a:not(:last-child)
+            margin-bottom: 10px
+
+.register-page
+    form
+        display: flex
+        justify-content: center
+        flex-direction: column
+        align-items: center
+
+        input
+            width: 100%
+
+        .submit-button
+            cursor: pointer
+            background-color: #444444
+            color: white
+
+            &:hover
+                background-color: #2e2e2e
+
+            &:active
+                color: whitesmoke
+                background-color: #000000
+
+        *:not(:last-child)
             margin-bottom: 10px
 
 @media (max-width: 850px)

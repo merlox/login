@@ -5,6 +5,7 @@ const webpack = require('webpack')
 
 module.exports = {
     mode: process.env.NODE_ENV,
+    devtool: process.env.NODE_ENV === 'production' ? 'source-map' : 'eval-source-map',
     entry: [
         'webpack-hot-middleware/client',
         path.join(__dirname, 'src', 'client', 'App.js')

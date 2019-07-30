@@ -14,7 +14,7 @@ export default class WelcomePage extends Component {
 
     render () {
         return (
-            <div className="welcome-page">
+            <div className="page welcome-page">
                 <h1>Welcome{this.state.newVisitor ? '!' : ', again!'}</h1>
                 <p>Login or register to access the page</p>
                 <div className="link-container">

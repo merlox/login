@@ -13,6 +13,11 @@ if(process.env.NODE_ENV != 'production') {
 		noInfo: true,
 		publicPath: webpackConfig.output.publicPath,
 	}))
+	app.use(require('webpack-hot-middleware')(compiler, {
+		log: console.log,
+		path: '/__webpack_hmr',
+		heartbeat: 10 * 1000
+	}))
 }
 
 const port = 8000
@@ -28,6 +33,10 @@ app.use('*', (req, res, next) => {
 
 app.get('/build.js', (req, res) => {
     return res.sendFile(path.join(__dirname, '../../dist/build.js'))
+})
+
+app.get('/__webpack_hmr', (req, res) => {
+	return res.sendFile(path.join(__dirname, '../../dist/build.js'))
 })
 
 app.get('*', (req, res) => {
