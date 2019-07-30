@@ -47,13 +47,8 @@ input[type='submit']
         color: whitesmoke
         background-color: #000000
 
-.nav
-    display: grid
-    grid-template-columns: repeat(3, 1fr)
-    justify-items: center
-    align-items: center
-
 .page
+    min-width: 250px
     max-width: 400px
     position: fixed
     box-shadow: 0 0 30px 0 lightgrey
@@ -104,8 +99,3 @@ input[type='submit']
 
         *:not(:last-child)
             margin-bottom: 10px
-
-@media (max-width: 850px)
-    .nav
-        grid-template-columns: 1fr
-        grid-template-rows: repeat(3, 70px)
