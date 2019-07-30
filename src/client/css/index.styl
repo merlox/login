@@ -22,29 +22,47 @@ input, textarea
     border-radius: 10px
     border: 1px solid lightgrey
 
+.boxy-link
+    color: white
+    text-decoration: none
+    padding: 20px 0
+    width: 100%
+    text-align: center
+    background-color: #444444
+
+    &:hover
+        background-color: #2e2e2e
+
+    &:active
+        color: whitesmoke
+        background-color: #000000
+
 .nav
     display: grid
     grid-template-columns: repeat(3, 1fr)
     justify-items: center
     align-items: center
 
-    a
-        color: white
-        text-decoration: none
-        padding: 20px 0
-        width: 100%
-        text-align: center
-        background-color: #444444
+.welcome-page
+    max-width: 400px
+    position: fixed
+    box-shadow: 0 0 30px 0 lightgrey
+    padding: 50px
+    border-radius: 10px
+    top: 50%
+    left: 50%
+    transform: translate(-50%, -50%)
+    text-align: center
 
-        &:hover
-            background-color: #2e2e2e
+    h1
+        margin-top: 0
 
-        &:active
-            color: whitesmoke
-            background-color: #000000
+    .link-container
+        display: flex
+        flex-direction: column
 
-.color-grey
-    color: lightgrey
+        a:not(:last-child)
+            margin-bottom: 10px
 
 @media (max-width: 850px)
     .nav

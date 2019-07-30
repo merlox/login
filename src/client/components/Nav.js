@@ -9,9 +9,9 @@ class Nav extends Component {
 	render () {
 		return (
 			<div className="nav">
-				<Link to="/">Home</Link>
-				<Link to="/login">Login</Link>
-				<Link to="/register">Register</Link>
+				<Link className="boxy-link" to="/">Home</Link>
+				<Link className="boxy-link" to="/login">Login</Link>
+				<Link className="boxy-link" to="/register">Register</Link>
             </div>
 		)
 	}
