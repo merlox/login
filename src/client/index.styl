@@ -1,0 +1,41 @@
+body
+    font-family: sans-serif
+    margin: 0
+
+button
+    background-color: rgb(42, 90, 162)
+    border: none
+    border-radius: 10px
+    padding: 20px
+    color: white
+    cursor: pointer
+    min-width: 200px
+
+    &:hover
+        opacity: 0.7
+
+    &:active
+        background-color: rgb(0, 98, 139)
+
+input, textarea
+    padding: 20px
+    border-radius: 10px
+    border: 1px solid lightgrey
+
+.nav
+    display: grid
+    grid-template-columns: repeat(3, 1fr)
+    justify-items: center
+    align-items: center
+    background-color: #444444
+
+    button
+        background-color: transparent
+
+.color-grey
+    color: lightgrey
+
+@media (max-width: 850px)
+    .nav
+        grid-template-columns: 1fr
+        grid-template-rows: repeat(3, 70px)
