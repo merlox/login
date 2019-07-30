@@ -13,12 +13,12 @@ app.use('*', (req, res, next) => {
 	next()
 })
 
-app.get('/', (req, res) => {
-    return res.sendFile(path.join(__dirname, '../../dist/index.html'))
-})
-
 app.get('/build.js', (req, res) => {
     return res.sendFile(path.join(__dirname, '../../dist/build.js'))
+})
+
+app.get('*', (req, res) => {
+    return res.sendFile(path.join(__dirname, '../../dist/index.html'))
 })
 
 app.listen(port, '0.0.0.0', (req, res) => {
