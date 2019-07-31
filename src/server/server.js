@@ -4,6 +4,8 @@ const path = require('path')
 const app = express()
 const jwt = require('jsonwebtoken')
 const user = require('./user')
+const setup = require('./setup')
+const port = 8000
 
 // This is to simplify everything but you should set it from the terminal
 process.env.SALT = 'express'
@@ -25,8 +27,6 @@ if(process.env.NODE_ENV != 'production') {
 	}))
 }
 
-const port = 8000
-
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true}))
 app.use('*', (req, res, next) => {
@@ -36,14 +36,16 @@ app.use('*', (req, res, next) => {
 
 	// JWT authentication
 	try {
-		const token = req.headers.authorization.split(" ")[1]
-		jwt.verify(token, key.tokenKey, async (err, payload) => {
-			console.log('Payload', payload)
-			if (payload) {
-				const foundDoc = await user.findById(payload.userId)
-				req.user = foundDoc
-			}
-		})
+		if (typeof req.headers.authorization != 'undefined') {
+			const token = req.headers.authorization.split(" ")[1]
+			jwt.verify(token, key.tokenKey, async (err, payload) => {
+				console.log('Payload', payload)
+				if (payload) {
+					const foundDoc = await user.findById(payload.userId)
+					req.user = foundDoc
+				}
+			})
+		}
 	} catch (err) {
 		next(err)
 	}

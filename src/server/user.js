@@ -33,3 +33,5 @@ userSchema.methods.comparePassword = (candidatePassword, next) => {
         next(null, isMatch)
     })
 }
+
+const User = mongoose.model('User', userSchema)
