@@ -14,7 +14,7 @@ export default class LoginPage extends Component {
     render () {
         return (
             <div className="page register-page">
-                <h1>Login form</h1>
+                <h1>Login</h1>
                 <p>Login with your email and password</p>
                 <form onSubmit={event => {
                     event.preventDefault()

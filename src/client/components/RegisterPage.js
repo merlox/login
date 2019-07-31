@@ -14,7 +14,7 @@ export default class RegisterPage extends Component {
     render () {
         return (
             <div className="page register-page">
-                <h1>Register form</h1>
+                <h1>Register</h1>
                 <p>Complete the form to register a new account</p>
                 <form onSubmit={event => {
                     event.preventDefault()

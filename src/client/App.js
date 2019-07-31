@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Switch } from 'react-router-dom'
 import WelcomePage from './components/WelcomePage'
 import RegisterPage from './components/RegisterPage'
 import LoginPage from './components/LoginPage'
+import UserPage from './components/UserPage'
 import './css/index.styl'
 
 class App extends Component {
@@ -23,6 +24,9 @@ class App extends Component {
 					)} />
 					<Route path="/register" render={() => (
 						<RegisterPage />
+					)} />
+					<Route path="/user" render={() => (
+						<UserPage />
 					)} />
 				</Switch>
 			</BrowserRouter>
