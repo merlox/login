@@ -5,6 +5,7 @@ const app = express()
 const jwt = require('jsonwebtoken')
 const User = require('./user')
 const setup = require('./setup')
+const bcrypt = require('bcrypt')
 const port = 8000
 
 /*
@@ -42,22 +43,6 @@ app.use('*', (req, res, next) => {
 	// Logger
 	let time = new Date()
 	console.log(`${req.method} to ${req.originalUrl} at ${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}`)
-
-	// JWT authentication
-	try {
-		if (typeof req.headers.authorization != 'undefined') {
-			const token = req.headers.authorization.split(" ")[1]
-			jwt.verify(token, key.tokenKey, async (err, payload) => {
-				console.log('Payload', payload)
-				if (payload) {
-					const foundDoc = await user.findById(payload.userId)
-					req.user = foundDoc
-				}
-			})
-		}
-	} catch (err) {
-		next(err)
-	}
 
 	next()
 })
@@ -110,30 +95,45 @@ app.post('/user', async (req, res) => {
 })
 
 // To login with an existing user
-app.get('/user/login', (req, res) => {
-	// TODO
-	User.findOne({email: req.body.email}).then(foundUser => {
-		console.log('found user', foundUser)
-		// If we found a user, return a message indicating that the user already exists
+/*
+	1. Check if user already exists
+	2. If not, return a message saying user not found
+	3. If found, generate the JWT token and send it
+*/
+app.post('/user/login', async (req, res) => {
+	try {
+		let foundUser = await User.findOne({email: req.body.email})
 		if(foundUser) {
-			foundUser.comparePassword(req.body.password, (err, isMatch) => {
-				if (isMatch) {
-					const token = jwt.sign({userId: foundUser.id}, process.env.SALT)
-					res.json({
-						userId: foundUser.id,
-						email: foundUser.email,
-						token
+			foundUser.comparePassword(req.body.password, (isMatch) => {
+				if(!isMatch) {
+					res.status(200).json({
+						ok: false,
+						message: 'User found but the password is invalid',
 					})
 				} else {
-					res.status(400).json({message: 'Invalid password or email'})
+					const token = jwt.sign({userId: foundUser._id}, process.env.SALT)
+					return res.status(200).json({
+						ok: true,
+						message: {
+							email: foundUser.email,
+							password: req.body.password,
+							token,
+						}
+					})
 				}
 			})
 		} else {
-
+			res.status(200).json({
+				ok: false,
+				message: 'User not found',
+			})
 		}
-	}).catch(err => {
-		res.status(400).json({message: 'Invalid password or email'})
-	})
+	} catch(err) {
+		res.status(200).json({
+			ok: false,
+			message: 'Invalid password or email',
+		})
+	}
 })
 
 app.get('/build.js', (req, res) => {

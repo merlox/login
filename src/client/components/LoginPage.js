@@ -8,7 +8,9 @@ export default class LoginPage extends Component {
         this.state = {
             password: '',
             repeatPassword: '',
-            displayError: false,
+            displayPasswordError: false,
+            displayEmailError: false,
+            postError: '',
         }
         this.checkIfLoggedIn()
     }
@@ -17,10 +19,10 @@ export default class LoginPage extends Component {
         this.checkIfLoggedIn()
     }
 
+    // Redirect user to the /user page if already logged in
     checkIfLoggedIn() {
         if(Cookie.get('token')) this.props.redirectTo(this.props.history, '/user')
     }
-
 
     // Returns true if the email is valid or false if not just in case the normal html validation doesn't work
     validateEmail() {
@@ -37,35 +39,24 @@ export default class LoginPage extends Component {
         return isValid
     }
 
-    // Returns true if the password length is larger than 0 and if the passwords match
-    validatePasswords() {
-        let isValid = false
-
-        if(this.state.password.length > 0 && this.state.password === this.state.repeatPassword) {
-            isValid = true
-            this.setState({displayPasswordError: false})
-        } else {
-            this.setState({displayPasswordError: true})
-        }
-        return isValid
-    }
 
     async logIn() {
         // First check if the email and passwords are valid, else stop
-        if(!this.validateEmail() || !this.validatePasswords()) return
+        if(!this.validateEmail()) return
 
         const user = {
             email: this.state.email,
             password: this.state.password,
         }
 
-        let fetchResult = await fetch('/user', {
+        let fetchResult = await fetch('/user/login', {
             method: 'post',
             headers: {
-                'content-type': 'application/json'
+                'content-type': 'application/json',
             },
             body: JSON.stringify(user)
         })
+
         let jsonResult = await fetchResult.json()
         if(jsonResult && !jsonResult.ok) {
             this.setState({postError: jsonResult.message})
@@ -85,7 +76,9 @@ export default class LoginPage extends Component {
                     event.preventDefault()
                     this.logIn()
                 }}>
-                    <div className={this.state.displayError ? "error-message" : "hidden"}>The passwords don't match</div>
+                    <div className={this.state.displayPasswordError ? "error-message" : "hidden"}>The passwords don't match</div>
+                    <div className={this.state.displayEmailError ? "error-message" : "hidden"}>The email is not valid</div>
+                    <div className={this.state.postError.length > 0 ? "error-message" : "hidden"}>{this.state.postError}</div>
                     <input type="email" onChange={input => {
                         this.setState({email: input.target.value})
                     }} placeholder="Your best email"/>
