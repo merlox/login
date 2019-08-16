@@ -4,8 +4,9 @@
     "description": "A minimalistic login / sign up system made with react and node",
     "main": "index.js",
     "scripts": {
-        "dev": "NODE_ENV=development nodemon src/server/server.js",
-        "start": "NODE_ENV=production node src/server/server.js"
+        "dev": "NODE_ENV=development node src/server/server.js",
+        "start": "NODE_ENV=production node src/server/server.js",
+        "compile": "NODE_ENV=production webpack"
     },
     "repository": {
         "type": "git",
