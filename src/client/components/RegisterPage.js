@@ -92,13 +92,13 @@ export default class RegisterPage extends Component {
                     <div className={this.state.postError.length > 0 ? "error-message" : "hidden"}>{this.state.postError}</div>
                     <input type="email" onChange={input => {
                         this.setState({email: input.target.value})
-                    }} placeholder="Your best email"/>
+                    }} placeholder="Your best email" autocomplete="username"/>
                     <input type="password" onChange={input => {
                         this.setState({password: input.target.value})
-                    }} placeholder="Your password"/>
+                    }} placeholder="Your password" autocomplete="new-password"/>
                     <input type="password" onChange={input => {
                         this.setState({repeatPassword: input.target.value})
-                    }} placeholder="Repeat your password"/>
+                    }} placeholder="Repeat your password" autocomplete="new-password"/>
                     <input className="submit-button" type="submit" value="Register" />
                 </form>
             </div>
