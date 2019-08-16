@@ -18,6 +18,7 @@ export default class LoginPage extends Component {
                 <p>Login with your email and password</p>
                 <form onSubmit={event => {
                     event.preventDefault()
+                    this.submitNewUser()
                 }}>
                     <div className={this.state.displayError ? "error-message" : "hidden"}>The passwords don't match</div>
                     <input type="email" placeholder="Your email"/>

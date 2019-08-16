@@ -8,6 +8,7 @@ module.exports = {
     devtool: process.env.NODE_ENV === 'production' ? 'source-map' : 'eval-source-map',
     entry: [
         'webpack-hot-middleware/client',
+        'babel-polyfill', 
         path.join(__dirname, 'src', 'client', 'App.js')
     ],
     output: {
