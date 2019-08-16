@@ -3,9 +3,17 @@ const bodyParser = require('body-parser')
 const path = require('path')
 const app = express()
 const jwt = require('jsonwebtoken')
-const user = require('./user')
+const User = require('./user')
 const setup = require('./setup')
 const port = 8000
+
+/*
+	Messages sent to the client contain the following fields
+	{
+		ok: true | false, // Whether the request was successful or not
+		message: {}, // The contents of the request if any
+	}
+*/
 
 // This is to simplify everything but you should set it from the terminal
 // required to encrypt user accounts
@@ -54,29 +62,78 @@ app.use('*', (req, res, next) => {
 	next()
 })
 
+// To register a new user
 app.post('/user', async (req, res) => {
 	try {
-		const foundUser = await user.findOne({email: req.body.email})
-		// console.log('found user')
-		foundUser.comparePassword(req.body.password, (err, isMatch) => {
-			if (isMatch) {
-				const token = jwt.sign({userId: user.id}, process.env.SALT)
-				res.json({
-					userId: user.id,
-					email: user.email,
-					token
+		let foundUser = await User.findOne({email: req.body.email})
+
+		// If we found a user, return a message indicating that the user already exists
+		if(foundUser) {
+			res.status(200).json({
+				ok: false,
+				message: 'The user already exists, login or try again',
+			})
+		} else {
+			let newUser = new User({
+				email: req.body.email,
+				password: req.body.password,
+			})
+
+			newUser.save(err => {
+				if(err) {
+					return res.status(200).json({
+						ok: false,
+						message: 'There was an error saving the new user, try again',
+					})
+				}
+
+				// Create the JWT token based on that new user
+				const token = jwt.sign({userId: newUser.id}, process.env.SALT)
+
+				// If the user was added successful, return the user credentials
+				return res.status(200).json({
+					ok: true,
+					message: {
+						email: req.body.email,
+						password: req.body.password,
+						token
+					}
 				})
-			} else {
-				res.status(400).json({message: 'Invalid password or email'})
-			}
+			})
+		}
+	} catch(err) {
+		res.status(200).json({
+			ok: false,
+			message: 'There was an error processing your request, try again',
 		})
-	} catch (err) {
-		res.status(400).json({message: 'Invalid password or email'})
 	}
 })
 
-app.get('/user', (req, res) => {
+// To login with an existing user
+app.get('/user/login', (req, res) => {
+	// TODO
+	User.findOne({email: req.body.email}).then(foundUser => {
+		console.log('found user', foundUser)
+		// If we found a user, return a message indicating that the user already exists
+		if(foundUser) {
+			foundUser.comparePassword(req.body.password, (err, isMatch) => {
+				if (isMatch) {
+					const token = jwt.sign({userId: foundUser.id}, process.env.SALT)
+					res.json({
+						userId: foundUser.id,
+						email: foundUser.email,
+						token
+					})
+				} else {
+					res.status(400).json({message: 'Invalid password or email'})
+				}
+			})
+		} else {
 
+		}
+	}).catch(err => {
+		res.status(400).json({message: 'Invalid password or email'})
+	})
 })
 
 app.get('/build.js', (req, res) => {

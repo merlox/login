@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import Cookie from 'js-cookie'
 
 export default class RegisterPage extends Component {
     constructor () {
@@ -12,6 +13,15 @@ export default class RegisterPage extends Component {
             displayEmailError: false,
             postError: '',
         }
+        this.checkIfLoggedIn()
+    }
+
+    componentDidMount() {
+        this.checkIfLoggedIn()
+    }
+
+    checkIfLoggedIn() {
+        if(Cookie.get('token')) this.props.redirectTo(this.props.history, '/user')
     }
 
     // Returns true if the email is valid or false if not just in case the normal html validation doesn't work
@@ -59,7 +69,13 @@ export default class RegisterPage extends Component {
             body: JSON.stringify(user)
         })
         let jsonResult = await fetchResult.json()
-        if(jsonResult && jsonResult.message) this.setState({postError: jsonResult.message})
+        if(jsonResult && !jsonResult.ok) {
+            this.setState({postError: jsonResult.message})
+        } else if(jsonResult && jsonResult.ok) {
+            Cookie.set('token', jsonResult.message.token)
+            localStorage.setItem('email', this.state.email)
+            this.props.redirectTo(this.props.history, "/user")
+        }
     }
 
     render () {
@@ -74,7 +90,7 @@ export default class RegisterPage extends Component {
                     <div className={this.state.displayPasswordError ? "error-message" : "hidden"}>The passwords don't match</div>
                     <div className={this.state.displayEmailError ? "error-message" : "hidden"}>The email is not valid</div>
                     <div className={this.state.postError.length > 0 ? "error-message" : "hidden"}>{this.state.postError}</div>
-                    <input type="text" onChange={input => {
+                    <input type="email" onChange={input => {
                         this.setState({email: input.target.value})
                     }} placeholder="Your best email"/>
                     <input type="password" onChange={input => {

@@ -12,10 +12,8 @@ const userSchema = new mongoose.Schema({
 })
 
 // Before creating a new user, encrypt the password
-userSchema.pre('save', async next => {
+userSchema.pre('save', async function(next) {
     const user = this
-    if (!user.isModified('password')) return next()
-
     try {
         const hashedPassword = await bcrypt.hash(user.password, 10)
         user.password = hashedPassword
@@ -23,8 +21,6 @@ userSchema.pre('save', async next => {
     } catch(err) {
         next(err)
     }
-}, err => {
-    next(err)
 })
 
 userSchema.methods.comparePassword = (candidatePassword, next) => {
@@ -35,3 +31,4 @@ userSchema.methods.comparePassword = (candidatePassword, next) => {
 }
 
 const User = mongoose.model('User', userSchema)
+module.exports = User

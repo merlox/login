@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
+import Cookie from 'js-cookie'
 
 export default class WelcomePage extends Component {
     constructor () {
@@ -9,6 +10,14 @@ export default class WelcomePage extends Component {
             newVisitor: typeof window.localStorage.newVisitor == 'undefined'
         }
         window.localStorage.newVisitor = false
+    }
+
+    componentDidMount() {
+        this.checkIfLoggedIn()
+    }
+
+    checkIfLoggedIn() {
+        if(Cookie.get('token')) this.props.redirectTo(this.props.history, '/user')
     }
 
     render () {

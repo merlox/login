@@ -12,21 +12,45 @@ class App extends Component {
 		super()
 	}
 
+	redirectTo(history, location) {
+		history.push(location);
+	}
+
 	render () {
 		return (
 			<BrowserRouter>
 				<Switch>
-					<Route path="/" exact render={() => (
-						<WelcomePage />
+					<Route path="/" exact render={context => (
+						<WelcomePage
+							history={context.history}
+							redirectTo={(history, location) => {
+							  this.redirectTo(history, location)
+							}}
+						/>
 					)} />
-					<Route path="/login" render={() => (
-						<LoginPage />
+					<Route path="/login" render={context => (
+						<LoginPage
+							history={context.history}
+							redirectTo={(history, location) => {
+							  this.redirectTo(history, location)
+							}}
+						/>
 					)} />
-					<Route path="/register" render={() => (
-						<RegisterPage />
+					<Route path="/register" render={context => (
+						<RegisterPage
+							history={context.history}
+			                redirectTo={(history, location) => {
+			                  this.redirectTo(history, location)
+						  	}}
+						/>
 					)} />
-					<Route path="/user" render={() => (
-						<UserPage />
+					<Route path="/user" render={context => (
+						<UserPage
+							history={context.history}
+							redirectTo={(history, location) => {
+							  this.redirectTo(history, location)
+							}}
+						/>
 					)} />
 				</Switch>
 			</BrowserRouter>
