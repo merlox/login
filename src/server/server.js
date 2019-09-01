@@ -6,7 +6,17 @@ const jwt = require('jsonwebtoken')
 const User = require('./user')
 const setup = require('./setup')
 const bcrypt = require('bcrypt')
-const port = 8000
+const yargs = require('yargs')
+const argv = yargs.option('port', {
+    alias: 'p',
+    description: 'Set the port to run this server on',
+    type: 'number',
+}).help().alias('help', 'h').argv
+if(!argv.port) {
+    console.log('Error, you need to pass the port you want to run this application on with npm start -- -p 8001')
+    process.exit(0)
+}
+const port = argv.port
 
 /*
 	Messages sent to the client contain the following fields
