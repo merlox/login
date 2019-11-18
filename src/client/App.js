@@ -5,6 +5,7 @@ import WelcomePage from './components/WelcomePage'
 import RegisterPage from './components/RegisterPage'
 import LoginPage from './components/LoginPage'
 import UserPage from './components/UserPage'
+import ResetPasswordForm from './components/ResetPasswordForm'
 import './css/index.styl'
 
 class App extends Component {
@@ -39,9 +40,9 @@ class App extends Component {
 					<Route path="/register" render={context => (
 						<RegisterPage
 							history={context.history}
-			                redirectTo={(history, location) => {
-			                  this.redirectTo(history, location)
-						  	}}
+              redirectTo={(history, location) => {
+                this.redirectTo(history, location)
+					  	}}
 						/>
 					)} />
 					<Route path="/user" render={context => (
@@ -49,6 +50,14 @@ class App extends Component {
 							history={context.history}
 							redirectTo={(history, location) => {
 							  this.redirectTo(history, location)
+							}}
+						/>
+					)} />
+					<Route path="/reset-password-form" render={context => (
+						<ResetPasswordForm
+							history={context.history}
+							redirectTo={(history, location) => {
+								this.redirectTo(history, location)
 							}}
 						/>
 					)} />

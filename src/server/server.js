@@ -1,12 +1,18 @@
+require('dotenv-safe').config()
+
+const { FORGOT_PASSWORD_DOMAIN } = process.env
 const express = require('express')
 const bodyParser = require('body-parser')
+const limiter = require('express-rate-limit')
 const path = require('path')
 const app = express()
 const jwt = require('jsonwebtoken')
 const User = require('./user')
+const ForgotPasswordToken = require('./forgotPasswordToken')
 const setup = require('./setup')
 const bcrypt = require('bcrypt')
 const yargs = require('yargs')
+const sendEmail = require('./sendEmail')
 const argv = yargs.option('port', {
     alias: 'p',
     description: 'Set the port to run this server on',
@@ -18,34 +24,9 @@ if(!argv.port) {
 }
 const port = argv.port
 
-/*
-	Messages sent to the client contain the following fields
-	{
-		ok: true | false, // Whether the request was successful or not
-		message: {}, // The contents of the request if any
-	}
-*/
-
 // This is to simplify everything but you should set it from the terminal
 // required to encrypt user accounts
 process.env.SALT = 'express'
-
-// Set the webpack hot reloading functionality with a custom server on development
-if(process.env.NODE_ENV != 'production') {
-	console.log('Serving server on dev mode with hot reloading')
-	const webpack = require('webpack')
-	const webpackConfig = require(__dirname + './../../webpack.config.js')
-	const compiler = webpack(webpackConfig)
-	app.use(require('webpack-dev-middleware')(compiler, {
-		noInfo: true,
-		publicPath: webpackConfig.output.publicPath,
-	}))
-	app.use(require('webpack-hot-middleware')(compiler, {
-		log: console.log,
-		path: '/__webpack_hmr',
-		heartbeat: 5e3
-	}))
-}
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true}))
@@ -53,7 +34,6 @@ app.use('*', (req, res, next) => {
 	// Logger
 	let time = new Date()
 	console.log(`${req.method} to ${req.originalUrl} at ${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}`)
-
 	next()
 })
 
@@ -61,30 +41,32 @@ app.use('*', (req, res, next) => {
 app.post('/user', async (req, res) => {
 	try {
 		let foundUser = await User.findOne({email: req.body.email})
-
 		// If we found a user, return a message indicating that the user already exists
 		if(foundUser) {
-			res.status(200).json({
+			res.status(400).json({
 				ok: false,
 				message: 'The user already exists, login or try again',
 			})
 		} else {
+      if (req.body.password.length < 6) {
+        res.status(400).json({
+  				ok: false,
+  				message: 'The password must be at least 6 characters',
+  			})
+      }
 			let newUser = new User({
 				email: req.body.email,
 				password: req.body.password,
 			})
-
 			newUser.save(err => {
 				if(err) {
-					return res.status(200).json({
+					return res.status(400).json({
 						ok: false,
 						message: 'There was an error saving the new user, try again',
 					})
 				}
-
 				// Create the JWT token based on that new user
 				const token = jwt.sign({userId: newUser.id}, process.env.SALT)
-
 				// If the user was added successful, return the user credentials
 				return res.status(200).json({
 					ok: true,
@@ -97,7 +79,7 @@ app.post('/user', async (req, res) => {
 			})
 		}
 	} catch(err) {
-		res.status(200).json({
+		res.status(400).json({
 			ok: false,
 			message: 'There was an error processing your request, try again',
 		})
@@ -116,7 +98,7 @@ app.post('/user/login', async (req, res) => {
 		if(foundUser) {
 			foundUser.comparePassword(req.body.password, (isMatch) => {
 				if(!isMatch) {
-					res.status(200).json({
+					res.status(400).json({
 						ok: false,
 						message: 'User found but the password is invalid',
 					})
@@ -133,17 +115,73 @@ app.post('/user/login', async (req, res) => {
 				}
 			})
 		} else {
-			res.status(200).json({
+			res.status(400).json({
 				ok: false,
 				message: 'User not found',
 			})
 		}
 	} catch(err) {
-		res.status(200).json({
+		res.status(400).json({
 			ok: false,
 			message: 'Invalid password or email',
 		})
 	}
+})
+
+app.post('/forgot-password', limiter({
+  windowMs: 10 * 60 * 1000, // One every 10 minutes if blocked
+  max: 10, // Start limiting after 10 requests
+  message: "You're making too many requests to this endpoint",
+}), (req, res) => {
+  console.log('Email receiver', req.body.email)
+  const token = String(Math.ceil(Math.random() * 16))
+  const recoveryLink = `${FORGOT_PASSWORD_DOMAIN}forgot-password/${token}/${req.body.email}`
+  // Store token in the db
+  const tokenSave = new ForgotPasswordToken({
+    email: req.body.email,
+    token,
+  })
+  tokenSave.save(async err => {
+    if(err) {
+      return res.status(400).json({
+        ok: false,
+        message: 'There was an error saving the recovery token, try again',
+      })
+    }
+    try {
+      // Send email
+      await sendEmail(req.body.email, 'Reset your account password', `If you're receiving this message is because you've clicked on 'I forgot my password' on the login page. Here's your recovery link: ${recoveryLink}`)
+    } catch (e) {
+      res.status(400).json({
+        ok: false,
+        msg: 'There was an error sending your recovery email, try again in a moment'
+      })
+    }
+  })
+})
+
+// The endpoint called when clicking on the recovery password email
+app.get('/forgot-password/:token/:email', limiter({
+  windowMs: 10 * 60 * 1000, // One every 10 minutes if blocked
+  max: 10, // Start limiting after 10 requests
+  message: "You're making too many requests to this endpoint",
+}), async (req, res) => {
+  // First check that the token is valid, and if it is, show him the setup new password page
+  try {
+    const foundToken = await ForgotPasswordToken.findOne({
+      email: req.params.email,
+      token: req.params.token,
+    })
+    if (!foundToken) {
+      return res.status(400).json({
+        ok: false,
+        msg: `The token is invalid, try again`,
+      })
+    } else {
+      // Redirects to the usual page but in react it will display the right form
+      res.redirect(`/reset-password-form?email=${req.params.email}&token=${req.params.token}`)
+    }
+  }
 })
 
 app.get('/build.js', (req, res) => {
@@ -160,5 +198,5 @@ app.listen(port, '0.0.0.0', (req, res) => {
 
 function protectRoute(req, res, next) {
 	if (req.user) next()
-	else res.status(500).json({error: 'You must be logged to access this page'})
+	else res.status(401).json({error: 'You must be logged to access this page'})
 }

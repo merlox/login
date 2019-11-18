@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-mongoose.connect('mongodb://example:example1@ds157707.mlab.com:57707/authentication', {
+mongoose.connect('mongodb://localhost:27017/authentication', {
 	useNewUrlParser: true,
 	useCreateIndex: true,
 })
