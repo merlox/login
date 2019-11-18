@@ -6,7 +6,8 @@
     "scripts": {
         "dev": "cross-env NODE_ENV=development node src/server/server.js",
         "start": "cross-env NODE_ENV=production node src/server/server.js",
-        "compile": "cross-env NODE_ENV=production webpack"
+        "compile": "cross-env NODE_ENV=production webpack",
+        "watch": "cross-env NODE_ENV=development webpack -w"
     },
     "repository": {
         "type": "git",
@@ -23,7 +24,9 @@
         "bcrypt": "^3.0.6",
         "body-parser": "^1.19.0",
         "cross-env": "^5.2.1",
+        "dotenv-safe": "^8.2.0",
         "express": "^4.17.1",
+        "express-rate-limit": "^5.0.0",
         "js-cookie": "^2.2.1",
         "jsonwebtoken": "^8.5.1",
         "mongodb": "^3.1.6",

@@ -1,66 +1,56 @@
-import React, { Component } from 'react'
+import React, { useState, useEffect } from 'react'
 import Cookie from 'js-cookie'
 
-export default class RegisterPage extends Component {
-  constructor () {
-    super()
+export default props => {
+  const [password, setPassword] = useState('')
+  const [email, setEmail] = useState('')
+  const [repeatPassword, setRepeatPassword] = useState('')
+  const [displayPasswordError, setDisplayPasswordError] = useState(false)
+  const [displayEmailError, setDisplayEmailError] = useState(false)
+  const [postError, setPostError] = useState('')
 
-    this.state = {
-      email: '',
-      password: '',
-      repeatPassword: '',
-      displayPasswordError: false,
-      displayEmailError: false,
-      postError: '',
-    }
-    this.checkIfLoggedIn()
-  }
+  useEffect(() => {
+    checkIfLoggedIn()
+  }, [])
 
-  componentDidMount() {
-    this.checkIfLoggedIn()
-  }
-
-  checkIfLoggedIn() {
-    if(Cookie.get('token')) this.props.redirectTo(this.props.history, '/user')
+  const checkIfLoggedIn = () => {
+    if(Cookie.get('token')) props.redirectTo(props.history, '/user')
   }
 
   // Returns true if the email is valid or false if not just in case the normal html validation doesn't work
-  validateEmail() {
+  const validateEmail = () => {
     // Check if the email is valid using the official RFC 5322 standard for email addresses
     let regex = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/
     let isValid = false
 
-    if(this.state.email.length != 0 && regex.test(this.state.email)) {
+    if(email.length != 0 && regex.test(email)) {
       isValid = true
-      this.setState({displayEmailError: false})
+      setDisplayEmailError(false)
     } else {
-      this.setState({displayEmailError: true})
+      setDisplayEmailError(true)
     }
     return isValid
   }
 
   // Returns true if the password length is larger than 0 and if the passwords match
-  validatePasswords() {
+  const validatePasswords = () => {
     let isValid = false
-
-    if(this.state.password.length > 0 && this.state.password === this.state.repeatPassword) {
+    if(password.length > 0 && password === repeatPassword) {
       isValid = true
-      this.setState({displayPasswordError: false})
+      setDisplayPasswordError(false)
     } else {
-      this.setState({displayPasswordError: true})
+      setDisplayPasswordError(true)
     }
     return isValid
   }
 
-  async submitNewUser() {
+  const submitNewUser = async () => {
     // First check if the email and passwords are valid, else stop
-    if(!this.validateEmail() || !this.validatePasswords()) return
-
+    if(!validateEmail() || !validatePasswords()) return
     const user = {
-      email: this.state.email,
-      password: this.state.password,
+      email,
+      password,
     }
-
     let fetchResult = await fetch('/user', {
       method: 'post',
       headers: {
@@ -70,38 +60,36 @@ export default class RegisterPage extends Component {
     })
     let jsonResult = await fetchResult.json()
     if(jsonResult && !jsonResult.ok) {
-      this.setState({postError: jsonResult.message})
+      setPostError(jsonResult.message)
     } else if(jsonResult && jsonResult.ok) {
       Cookie.set('token', jsonResult.message.token)
-      localStorage.setItem('email', this.state.email)
-      this.props.redirectTo(this.props.history, "/user")
+      localStorage.setItem('email', email)
+      props.redirectTo(props.history, "/user")
     }
   }
 
-  render () {
-    return (
-      <div className="page register-page">
+  return (
+    <div className="page register-page">
       <h1>Register</h1>
       <p>Complete the form to register a new account</p>
       <form onSubmit={event => {
         event.preventDefault()
-        this.submitNewUser()
+        submitNewUser()
       }}>
-      <div className={this.state.displayPasswordError ? "error-message" : "hidden"}>The passwords don't match</div>
-      <div className={this.state.displayEmailError ? "error-message" : "hidden"}>The email is not valid</div>
-      <div className={this.state.postError.length > 0 ? "error-message" : "hidden"}>{this.state.postError}</div>
-      <input type="email" onChange={input => {
-        this.setState({email: input.target.value})
-      }} placeholder="Your best email" autocomplete="username"/>
-      <input type="password" onChange={input => {
-        this.setState({password: input.target.value})
-      }} placeholder="Your password" autocomplete="new-password"/>
-      <input type="password" onChange={input => {
-        this.setState({repeatPassword: input.target.value})
-      }} placeholder="Repeat your password" autocomplete="new-password"/>
-      <input className="submit-button" type="submit" value="Register" />
+        <div className={displayPasswordError ? "error-message" : "hidden"}>The passwords don't match</div>
+        <div className={displayEmailError ? "error-message" : "hidden"}>The email is not valid</div>
+        <div className={postError.length > 0 ? "error-message" : "hidden"}>{postError}</div>
+        <input type="email" onChange={input => {
+          setEmail(input.target.value)
+        }} placeholder="Your best email" autoComplete="username"/>
+        <input type="password" onChange={input => {
+          setPassword(input.target.value)
+        }} placeholder="Your password" autoComplete="new-password"/>
+        <input type="password" onChange={input => {
+          setRepeatPassword(input.target.value)
+        }} placeholder="Repeat your password" autoComplete="new-password"/>
+        <input className="submit-button" type="submit" value="Register" />
       </form>
-      </div>
-    )
-  }
+    </div>
+  )
 }

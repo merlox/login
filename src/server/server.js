@@ -132,8 +132,24 @@ app.post('/forgot-password', limiter({
   windowMs: 10 * 60 * 1000, // One every 10 minutes if blocked
   max: 10, // Start limiting after 10 requests
   message: "You're making too many requests to this endpoint",
-}), (req, res) => {
-  console.log('Email receiver', req.body.email)
+}), async (req, res) => {
+  // Find if the email received exists or not
+  try {
+    const foundUser = await User.findOne({
+      email: req.body.email,
+    })
+    if (!foundUser) {
+      return res.status(400).json({
+        ok: false,
+        msg: 'The email address is not registered',
+      })
+    }
+  } catch (e) {
+    return res.status(400).json({
+      ok: false,
+      msg: 'There was an error checking the user email address'
+    })
+  }
   const token = String(Math.ceil(Math.random() * 16))
   const recoveryLink = `${FORGOT_PASSWORD_DOMAIN}forgot-password/${token}/${req.body.email}`
   // Store token in the db
@@ -181,6 +197,11 @@ app.get('/forgot-password/:token/:email', limiter({
       // Redirects to the usual page but in react it will display the right form
       res.redirect(`/reset-password-form?email=${req.params.email}&token=${req.params.token}`)
     }
+  } catch (e) {
+    return res.status(400).json({
+      ok: false,
+      msg: `Couldn't check your password recovery url, try to generate a new one`,
+    })
   }
 })
 

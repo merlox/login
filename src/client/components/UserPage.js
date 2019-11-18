@@ -1,32 +1,24 @@
-import React, { Component } from 'react'
+import React, { useState, useEffect } from 'react'
 import Cookie from 'js-cookie'
 import { Link } from 'react-router-dom'
 
-export default class UserPage extends Component {
-  constructor () {
-    super()
+export default props => {
+  const [email, setEmail] = useState(localStorage.getItem('email') ? localStorage.getItem('email') : '')
 
-    this.state = {
-      email: localStorage.getItem('email') ? localStorage.getItem('email') : ''
-    }
-  }
-
-  logOut() {
+  const logOut = () => {
     localStorage.setItem('email', undefined)
     Cookie.remove('token')
-    this.props.redirecTo(this.props.history, '/')
+    props.redirecTo(props.history, '/')
   }
 
-  render () {
-    return (
-      <div className="page welcome-page">
-      <h1>Welcome {this.state.email}!</h1>
+  return (
+    <div className="page">
+      <h1>Welcome {email}!</h1>
       <div className="link-container">
-      <Link className="boxy-link" to="/" onClick={() => {
-        this.logOut()
-      }} >Log out</Link>
+        <Link className="boxy-link" to="/" onClick={() => {
+          logOut()
+        }}>Log out</Link>
       </div>
-      </div>
-    )
-  }
+    </div>
+  )
 }
