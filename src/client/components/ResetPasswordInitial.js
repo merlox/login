@@ -1,14 +1,17 @@
 import React, { useState } from 'react'
+import Spinner from './Spinner'
 
 export default props => {
   const [email, setEmail] = useState('')
   const [postError, setPostError] = useState('')
   const [success, setSuccess] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const startResetPassword = async () => {
     setPostError('')
     setSuccess('')
     if (email.length == 0) return setPostError('You need to specify the email')
+    setLoading(true)
     try {
       const request = await fetch(`/forgot-password`, {
         method: 'post',
@@ -18,7 +21,7 @@ export default props => {
         body: JSON.stringify({ email })
       })
       const response = await request.json()
-      console.log('RESPONSE', response)
+      setLoading(false)
       if (!response) {
         setPostError('There was an error making the request')
       }
@@ -44,8 +47,10 @@ export default props => {
         <div className={postError.length > 0 ? "error-message" : "hidden"}>{postError}</div>
         <input type="email" onChange={input => {
           setEmail(input.target.value)
-        }} placeholder="Your best email" autoComplete="username"/>
-        <input className="submit-button" type="submit" value="Reset Password" />
+        }} placeholder="Your email" autoComplete="username"/>
+        <button type="submit" disabled={loading}>
+          {loading ? <Spinner className="spinner"/> : 'Send Reset Email'}
+        </button>
       </form>
     </div>
   )

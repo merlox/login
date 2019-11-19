@@ -1,10 +1,12 @@
 import React, { useState } from 'react'
 import Cookie from 'js-cookie'
+import Spinner from './Spinner'
 
 export default props => {
   const [password, setPassword] = useState('')
   const [repeatPassword, setRepeatPassword] = useState('')
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
   // Returns true if the password length is larger than 0 and if the passwords match
   const validatePasswords = () => {
@@ -37,6 +39,7 @@ export default props => {
     const emailFound = getQueryVariable('email')
     const tokenFound = getQueryVariable('token')
     if (!emailFound || !tokenFound) return setError('The password reset is invalid, try generating a new password reset request from the beginning')
+    setLoading(true)
     const user = {
       email: emailFound,
       token: tokenFound,
@@ -50,6 +53,7 @@ export default props => {
       body: JSON.stringify(user)
     })
     let response = await request.json()
+    setLoading(false)
     if (!response) {
       return setError('There was an error making the request')
     }
@@ -75,7 +79,9 @@ export default props => {
         <input type="password" onChange={input => {
           setRepeatPassword(input.target.value)
         }} placeholder="Repeat your password" autoComplete="new-password"/>
-        <input className="submit-button" type="submit" value="Register" />
+        <button type="submit" disabled={loading}>
+          {loading ? <Spinner className="spinner"/> : 'Save Password'}
+        </button>
       </form>
     </div>
   )

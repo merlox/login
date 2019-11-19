@@ -94,6 +94,12 @@ app.put('/user', async (req, res) => {
       msg: 'There was an error making the request',
     })
   }
+  if (req.body.password.length < 6) {
+    return res.status(400).json({
+      ok: false,
+      msg: 'The password must be at least 6 characters',
+    })
+  }
   try {
     // Find the token email combo
     const forgotPasswordTokenFound = await ForgotPasswordToken.findOne({
