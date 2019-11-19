@@ -7,7 +7,12 @@ const forgotPasswordTokenSchema = new mongoose.Schema({
   token: {
     type: String,
     required: true,
-  }
+  },
+  // Can be used only once so that's why we have this boolean
+  isValid: {
+    type: Boolean,
+    default: true,
+  },
 }, {
   timestamps: true,
 })

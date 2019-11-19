@@ -18,8 +18,8 @@ export default props => {
       <h1>Welcome{newVisitor ? '!' : ', again!'}</h1>
       <p>Login or register to access the page</p>
       <div className="link-container">
-      <Link className="boxy-link" to="/login">Login</Link>
-      <Link className="boxy-link" to="/register">Register</Link>
+        <Link className="boxy-link" to="/login">Login</Link>
+        <Link className="boxy-link" to="/register">Register</Link>
       </div>
     </div>
   )

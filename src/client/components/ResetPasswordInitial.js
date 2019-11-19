@@ -7,6 +7,7 @@ export default props => {
 
   const startResetPassword = async () => {
     setPostError('')
+    setSuccess('')
     if (email.length == 0) return setPostError('You need to specify the email')
     try {
       const request = await fetch(`/forgot-password`, {
@@ -17,13 +18,14 @@ export default props => {
         body: JSON.stringify({ email })
       })
       const response = await request.json()
+      console.log('RESPONSE', response)
       if (!response) {
         setPostError('There was an error making the request')
       }
       if (!response.ok) {
         setPostError(response.msg)
       } else {
-
+        setSuccess(response.msg)
       }
     } catch (e) {
       setPostError('There was an error making the password reset request')
@@ -38,6 +40,7 @@ export default props => {
         event.preventDefault()
         startResetPassword()
       }}>
+        <div className={success.length > 0 ? "success" : "hidden"}>{success}</div>
         <div className={postError.length > 0 ? "error-message" : "hidden"}>{postError}</div>
         <input type="email" onChange={input => {
           setEmail(input.target.value)

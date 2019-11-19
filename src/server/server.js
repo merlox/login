@@ -86,6 +86,55 @@ app.post('/user', async (req, res) => {
 	}
 })
 
+// To update a user's password
+app.put('/user', async (req, res) => {
+  if (!req.body.email || !req.body.password || !req.body.token) {
+    return res.status(400).json({
+      ok: false,
+      msg: 'There was an error making the request',
+    })
+  }
+  try {
+    // Find the token email combo
+    const forgotPasswordTokenFound = await ForgotPasswordToken.findOne({
+      email: req.body.email,
+      token: req.body.token,
+    })
+    let foundUser = await User.findOne({email: req.body.email})
+    if (!foundUser) {
+      return res.status(400).json({
+        ok: false,
+        msg: 'The user email is not registered',
+      })
+    }
+    if (!forgotPasswordTokenFound) {
+      return res.status(400).json({
+        ok: false,
+        msg: 'Could not find that user reset token',
+      })
+    } else if (!forgotPasswordTokenFound.isValid) {
+      return res.status(400).json({
+        ok: false,
+        msg: 'This password recovery token has already been used, request a new one',
+      })
+    } else {
+      forgotPasswordTokenFound.isValid = false
+      await forgotPasswordTokenFound.save()
+    }
+    foundUser.password = req.body.password
+    await foundUser.save()
+    res.status(200).json({
+      ok: true,
+      msg: 'User updated successfully'
+    })
+  } catch (e) {
+    return res.status(400).json({
+      ok: false,
+      msg: 'There was an error processing the request',
+    })
+  }
+})
+
 // To login with an existing user
 /*
 	1. Check if user already exists
@@ -150,7 +199,7 @@ app.post('/forgot-password', limiter({
       msg: 'There was an error checking the user email address'
     })
   }
-  const token = String(Math.ceil(Math.random() * 16))
+  const token = String(Math.ceil(Math.random() * 1e16))
   const recoveryLink = `${FORGOT_PASSWORD_DOMAIN}forgot-password/${token}/${req.body.email}`
   // Store token in the db
   const tokenSave = new ForgotPasswordToken({
@@ -158,7 +207,7 @@ app.post('/forgot-password', limiter({
     token,
   })
   tokenSave.save(async err => {
-    if(err) {
+    if (err) {
       return res.status(400).json({
         ok: false,
         message: 'There was an error saving the recovery token, try again',
@@ -167,6 +216,10 @@ app.post('/forgot-password', limiter({
     try {
       // Send email
       await sendEmail(req.body.email, 'Reset your account password', `If you're receiving this message is because you've clicked on 'I forgot my password' on the login page. Here's your recovery link: ${recoveryLink}`)
+      res.status(200).json({
+        ok: true,
+        msg: 'The password reset email has been sent successfully, please click on the link to reset your password'
+      })
     } catch (e) {
       res.status(400).json({
         ok: false,
